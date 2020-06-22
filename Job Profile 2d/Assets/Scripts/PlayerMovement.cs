@@ -128,17 +128,6 @@ public class PlayerMovement : MonoBehaviour
             Vector2 addForce = new Vector2(wallHop * wallHopD.x * -facingD * _xMovement, wallHop * wallHopD.y);
             rb.AddForce(addForce, ForceMode2D.Impulse);
         }
-        else if (isWallSliding && jump && _xMovement != 0)
-        {
-            isWallSliding = false;
-            isWallJumping = true;
-            Invoke("ResetWallJump", .5f);
-            if (isWallJumping)
-            {
-                rb.velocity = new Vector2(wallJump * wallJumpD.x * _xMovement, wallJump * wallJumpD.y);
-            }
-
-        }
     }
     void CheckCanJump()
     {
