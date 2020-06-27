@@ -6,7 +6,7 @@ public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody2D rb;
     [SerializeField] private float _xAmount;
-    public static float _xMovement, _amount;
+    public  float _xMovement, _amount;
     private bool facingRight = true;
     private Animator anim;
     private bool crouch;
@@ -34,6 +34,9 @@ public class PlayerMovement : MonoBehaviour
     private bool isWallSliding;
     public float wallSlidingSpeed;
     private bool isWallJumping;
+
+    public int _XMovement { get; internal set; }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -116,11 +119,10 @@ public class PlayerMovement : MonoBehaviour
     }
     void Jump()
     {
-        float _yMove = jumpForce  * Time.fixedDeltaTime;
+        float _yMove = jumpForce;
         if (jump && !isWallSliding)
         {
-            rb.velocity = new Vector2(rb.velocity.x, _yMove);
-            rb.gravityScale = 2;
+            rb.velocity = Vector2.up * _yMove;
         }
         else if(jump && isWallSliding)//wall hop
         {

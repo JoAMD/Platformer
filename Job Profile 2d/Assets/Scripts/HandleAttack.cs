@@ -34,6 +34,7 @@ public class HandleAttack : MonoBehaviour
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         dashTime = startDash;
+        movement = GetComponent<PlayerMovement>();
     }
     private void FixedUpdate()
     {
@@ -68,13 +69,12 @@ public class HandleAttack : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
-                if (player._XMovement > 0)
-                {
-                    direction = 1;
-                }
-                else if (player._xMovemnt < 0)
+                if(movement._xMovement > 0)
                 {
                     direction = 2;
+                }else if(movement._xMovement < 0)
+                {
+                    direction = 1;
                 }
             }
             else
@@ -91,50 +91,48 @@ public class HandleAttack : MonoBehaviour
 
             }
         }
-        void Attack()
+    }
+    void Attack()
+    {
+        if (attack)
         {
-            if (attack)
+            int index = Random.Range(1, 4);
+            anim.SetTrigger("attack" + index);
+            rb.velocity = new Vector2(0, 0);
+            attack = false;
+            Collider2D[] hitenemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+            foreach (Collider2D destructible in hitenemies)
             {
-                int index = Random.Range(1, 4);
-                anim.SetTrigger("attack" + index);
-                rb.velocity = new Vector2(0, 0);
-                attack = false;
-                Collider2D[] hitenemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
-                foreach (Collider2D destructible in hitenemies)
+                _health = destructible.GetComponent<EnemyHealth>();
+                if (_health != null)
                 {
-                    _health = destructible.GetComponent<EnemyHealth>();
-                    if (_health != null)
-                    {
-                        _health.takeDamage(damage);
-                    }
-
+                    _health.takeDamage(damage);
                 }
+
             }
         }
-        void Slide()
+    }
+    void Dash()
+    {
+        if (direction == 1)
         {
-            if (slide)
-            {
-                anim.SetBool("Slide", true);
-                slide = false;
-            } else if (!slide)
-            {
-                anim.SetBool("Slide", false);
-            }
+            rb.velocity = Vector2.left * dashSpeed * Time.deltaTime;
         }
-        void Dash()
+        else if (direction == 2)
         {
-            if (direction == 1)
-            {
-                rb.velocity = Vector2.left * dashSpeed * Time.deltaTime;
-            } else if (direction == 2)
-            {
-                rb.velocity = Vector2.right * dashSpeed * Time.deltaTime;
-            }
+            rb.velocity = Vector2.right * dashSpeed * Time.deltaTime;
         }
-        void OnDrawGizmos()
+    }
+    void Slide()
+    {
+        if (slide)
         {
-            Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+            anim.SetBool("Slide", true);
+            slide = false;
+        }
+        else if (!slide)
+        {
+            anim.SetBool("Slide", false);
         }
     }
 }
