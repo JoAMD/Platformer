@@ -14,6 +14,7 @@ public class InputController : MonoBehaviour
     {
         if (Input.GetButtonDown("Interact"))
         {
+            //Calls all functions subscribed to the OnInteract action. Currently only elevator
             OnInteract?.Invoke();
         }
     }

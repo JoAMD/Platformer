@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class ElevatorBehaviour : InteractableObject
 {
-    [SerializeField] private bool isPlayerInRange = false;
 
     public Collider2D triggerInteractableCollider;
     public List<Transform> floors;
@@ -12,31 +11,41 @@ public class ElevatorBehaviour : InteractableObject
     public int currentFloor = 0;
     public bool isGoingUp = true;
 
+    /// <summary>
+    /// OnInteract function runs when player presses the Interact Button
+    /// CHecks for player in range, then move elevator
+    /// isPlayerInRange is set in base class InteractableObject (using Player tag as well)
+    /// </summary>
     public override void OnInteract()
     {
-        Debug.Log("running on interact");
+        //Debug.Log("running on interact");
         if (isPlayerInRange)
         {
-            Debug.Log("Player started elevator");
+            //Debug.Log("Player started elevator");
             MoveElevator();
         }
     }
 
     protected override void OnTriggerEnter2D(Collider2D collision)
     {
-        isPlayerInRange = true;
+        base.OnTriggerEnter2D(collision);
     }
 
     protected override void OnTriggerExit2D(Collider2D collision)
     {
-        isPlayerInRange = false;
+        base.OnTriggerExit2D(collision);
     }
 
 
+    /// <summary>
+    /// Move Elevator
+    /// Decides direction according to isGoingUp
+    /// Disables trigger collider so that player can'i interact when elevator is moving
+    /// </summary>
     private void MoveElevator()
     {
-        triggerInteractableCollider.enabled = false;
-        if(currentFloor == floors.Count - 1)
+        triggerInteractableCollider.enabled = false; //Disable trigger collider
+        if (currentFloor == floors.Count - 1)
         {
             isGoingUp = false;
         }
@@ -55,6 +64,12 @@ public class ElevatorBehaviour : InteractableObject
         }
     }
 
+    /// <summary>
+    /// Move elevator up and down according to floors list and direction
+    /// Re-enables trigger collider so that player can interact again after elevator has stopped
+    /// </summary>
+    /// <param name="direction"></param>
+    /// <returns></returns>
     private IEnumerator ElevatorLerpCo(int direction)
     {
         float t = 0;
@@ -68,7 +83,7 @@ public class ElevatorBehaviour : InteractableObject
         }
         transform.position = endPos;
         currentFloor += direction;
-        triggerInteractableCollider.enabled = true;
+        triggerInteractableCollider.enabled = true; //Re-enable trigger collider
     }
 
 }
