@@ -68,7 +68,7 @@ public class ElevatorBehaviour : InteractableObject
     /// Move elevator up and down according to floors list and direction
     /// Re-enables trigger collider so that player can interact again after elevator has stopped
     /// </summary>
-    /// <param name="direction"></param>
+    /// <param name="direction"> direction of movement of object, +1 means positive means up the list from 0 to the end </param>
     /// <returns></returns>
     private IEnumerator ElevatorLerpCo(int direction)
     {
