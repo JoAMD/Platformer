@@ -3,18 +3,9 @@ using UnityEngine.Events;
 
 public class CharacterController2D : MonoBehaviour
 {
-	public bool wallSliding;
-	public Transform wallCheck;
-	public float wallD;
-	public LayerMask whatisGround;
-	public bool isTouchingWall;
-	public Movement player;
-	public float wallSlideSpeed;
-	public bool walljumping;
-	public float xWallforce;
-	public float yWallforce;
-	public float wallJumpTime;
-	public float JumpMultiplier;
+	
+	public float JumpMultiplier = 0.5f;
+	private Animator anim;
 	[SerializeField] private float m_JumpForce = 400f;							// Amount of force added when the player jumps.
 	[Range(0, 1)] [SerializeField] private float m_CrouchSpeed = .36f;			// Amount of maxSpeed applied to crouching movement. 1 = 100%
 	[Range(0, .3f)] [SerializeField] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
@@ -25,7 +16,7 @@ public class CharacterController2D : MonoBehaviour
 	[SerializeField] private Collider2D m_CrouchDisableCollider;				// A collider that will be disabled when crouching
 
 	const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
-	private bool m_Grounded;            // Whether or not the player is grounded.
+	public bool m_Grounded;            // Whether or not the player is grounded.
 	const float k_CeilingRadius = .2f; // Radius of the overlap circle to determine if the player can stand up
 	private Rigidbody2D m_Rigidbody2D;
 	private bool m_FacingRight = true;  // For determining which way the player is currently facing.
@@ -51,30 +42,12 @@ public class CharacterController2D : MonoBehaviour
 
 		if (OnCrouchEvent == null)
 			OnCrouchEvent = new BoolEvent();
+		anim = GetComponent<Animator>();
 	}
 
 	private void FixedUpdate()
 	{
-		isTouchingWall = Physics2D.Raycast(wallCheck.position, transform.right, wallD, whatisGround);
-		if(isTouchingWall == true && m_Grounded == false && player.horizontalMove == 0){
-			wallSliding = true;
-		}else
-		{
-			wallSliding = false;
-		}
-		if(wallSliding == true)
-		{
-			m_Rigidbody2D.velocity = new Vector2(m_Rigidbody2D.velocity.x, Mathf.Clamp(m_Rigidbody2D.velocity.y, -wallSlideSpeed, float.MaxValue));
-		}
-		if (Input.GetButtonDown("Jump") && wallSliding == true)
-		{
-			walljumping = true;
-			Invoke("ResetWallJump", wallJumpTime); 
-		}
-		if(walljumping == true)
-		{
-			m_Rigidbody2D.velocity = new Vector2(m_Rigidbody2D.velocity.x * xWallforce * -player.horizontalMove, m_Rigidbody2D.velocity.y * yWallforce);
-		}
+		
 
 		bool wasGrounded = m_Grounded;
 		m_Grounded = false;
@@ -92,11 +65,7 @@ public class CharacterController2D : MonoBehaviour
 			}
 		}
 	}
-	void ResetWallJump()
-	{
-		walljumping = false;
-	}
-
+	
 
 	public void Move(float move, bool crouch, bool jump)
 	{
@@ -129,7 +98,8 @@ public class CharacterController2D : MonoBehaviour
 				// Disable one of the colliders when crouching
 				if (m_CrouchDisableCollider != null)
 					m_CrouchDisableCollider.enabled = false;
-			} else
+			}
+			else
 			{
 				// Enable the collider when not crouching
 				if (m_CrouchDisableCollider != null)
@@ -165,7 +135,7 @@ public class CharacterController2D : MonoBehaviour
 		{
 			// Add a vertical force to the player.
 			m_Grounded = false;
-			m_Rigidbody2D.velocity = new Vector2(m_Rigidbody2D.velocity.x, m_Rigidbody2D.velocity.y * m_JumpForce);
+			m_Rigidbody2D.velocity = new Vector2(m_Rigidbody2D.velocity.x, m_JumpForce);
 		}
 		if (Input.GetButtonUp("Jump"))
 		{

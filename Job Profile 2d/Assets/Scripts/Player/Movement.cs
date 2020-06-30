@@ -1,15 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity;
 
 public class Movement : MonoBehaviour
 {
+    public bool wallSliding;
+    public Transform wallCheck;
+    public float wallD;
+    public LayerMask whatisGround;
+    public bool isTouchingWall;
+    public Movement player;
+    public float wallSlideSpeed;
+    public bool walljumping;
+    public float xWallforce;
+    public float yWallforce;
+    public float wallJumpTime = 0.05f;
     public CharacterController2D controller;
     private Animator anim;
     public Collider2D disable;
     public float horizontalMove;
     private float runSpeed = 60f;
-    private bool jump = false;
+    private bool jump;
     private bool crouch = false;
     private int direction;
     private float dashTime;
@@ -22,31 +34,54 @@ public class Movement : MonoBehaviour
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
     }
-
+    void ResetJump()
+    {
+        walljumping = false;
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
+        isTouchingWall = Physics2D.Raycast(wallCheck.position, transform.right, wallD, whatisGround);
+
+        if (isTouchingWall == true && !controller.m_Grounded && horizontalMove != 0)
+        {
+            anim.SetBool("wallSliding", true);
+            wallSliding = true;
+        }
+        else
+        {
+            anim.SetBool("wallSliding", false);
+            wallSliding = false;
+        }
+        if (Input.GetButtonDown("Jump") && wallSliding == true)
+        {
+            walljumping = true;
+            Invoke("ResetJump", 0.02f);
+        }
+        if (walljumping == true)
+        {
+           rb.velocity = new Vector2(xWallforce * horizontalMove, yWallforce);
+        }
         horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
-        anim.SetFloat("Speed", Mathf.Abs(horizontalMove));
-        anim.SetFloat("yVelocity", rb.velocity.y);
+        setAnims();
         controller.Move(horizontalMove * Time.deltaTime, crouch, jump);
         jump = false;
         Dash();
     }
     public void onLanding()
     {
-        anim.SetBool("isJumping", false);
     }
     public void onCrouching(bool isCrouching)
     {
-        anim.SetBool("isCrouching", false);
+        anim.SetBool("isCrouching", isCrouching);
     }
+   
+
     private void Update()
     {
         if (Input.GetButtonDown("Jump"))
         {
             jump = true;
-            anim.SetBool("isJumping", true);
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
@@ -71,6 +106,11 @@ public class Movement : MonoBehaviour
                 disable.enabled = true;
             }
         }
+    }
+    void setAnims()
+    {
+        anim.SetFloat("Speed", Mathf.Abs(horizontalMove));
+        anim.SetFloat("yVelocity", rb.velocity.y);
     }
     void Dash()
     {
