@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DoorBehaviour : InteractableObject
+public class InteractableDoorBehaviour : InteractableObject
 {
 
     public KeyBehaviour keyBehaviour;
@@ -14,6 +14,7 @@ public class DoorBehaviour : InteractableObject
     public bool isCloseAfterDelay = false;
     public float closeDelay = 2f;
     public bool isUp = true;
+    public Transform doorTransform;
 
     public override void OnInteract()
     {
@@ -42,15 +43,15 @@ public class DoorBehaviour : InteractableObject
     private IEnumerator OpenDoor()
     {
         float t = 0;
-        float yCurr = transform.position.y;
+        float yCurr = doorTransform.position.y;
         float yEnd = yCurr + yUpDist;
         while (t < 1)
         {
-            transform.position = new Vector3(transform.position.x, Mathf.Lerp(yCurr, yEnd, t));
+            doorTransform.position = new Vector3(doorTransform.position.x, Mathf.Lerp(yCurr, yEnd, t));
             t += Time.deltaTime * doorOpenSmooth;
             yield return new WaitForEndOfFrame();
         }
-        transform.position = new Vector3(transform.position.x, yEnd);
+        doorTransform.position = new Vector3(doorTransform.position.x, yEnd);
 
         if (isCloseAfterDelay)
         {
@@ -64,15 +65,15 @@ public class DoorBehaviour : InteractableObject
         yield return new WaitForSeconds(closeDelay);
 
         float t = 0;
-        float yCurr = transform.position.y;
+        float yCurr = doorTransform.position.y;
         float yEnd = yCurr - yUpDist;
         while (t < 1)
         {
-            transform.position = new Vector3(transform.position.x, Mathf.Lerp(yCurr, yEnd, t));
+            doorTransform.position = new Vector3(doorTransform.position.x, Mathf.Lerp(yCurr, yEnd, t));
             t += Time.deltaTime * doorOpenSmooth;
             yield return new WaitForEndOfFrame();
         }
-        transform.position = new Vector3(transform.position.x, yEnd);
+        doorTransform.position = new Vector3(doorTransform.position.x, yEnd);
         doorCollider2D.enabled = true;
 
     }
