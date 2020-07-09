@@ -2,46 +2,74 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum DoorType
+{
+    None,
+    Key,
+    Lever,
+    Both
+}
+
 public class InteractableDoorBehaviour : InteractableObject
 {
-
+    public DoorType doorType = DoorType.Key;
     public KeyBehaviour keyBehaviour;
     private int keyID;
     public SpriteRenderer spriteRend;
     public float yUpDist = 3;
     public float doorOpenSmooth = 1f;
-    public Collider2D doorCollider2D;
+    public Collider2D interactableCollider2D;
     public bool isCloseAfterDelay = false;
     public float closeDelay = 2f;
     public bool isUp = true;
     public Transform doorTransform;
+    [HideInInspector] public bool isOpen = false;
 
     public override void OnInteract()
     {
-        if (isPlayerInRange && Inventory.instance.HasKey(keyID, out int keyInvIdx))
+        if (isPlayerInRange)
         {
-            if (!isCloseAfterDelay)
-            {
-                //key removed
-                Inventory.instance.RemoveKey(keyInvIdx);
-            }
-
-            spriteRend.color = Color.white;
             StartCoroutine(OpenDoor());
-            Debug.Log("Opening Door");
-            doorCollider2D.enabled = false;
         }
     }
 
     private void Start()
     {
-        keyID = keyBehaviour.gameObject.GetHashCode();
-        Debug.Log("in doorscript => " + keyID);
-        StartCoroutine(CheckForKeyMakeDoorGreen());
+        if (doorType == DoorType.Key ||
+            doorType == DoorType.Both)
+        {
+            keyID = keyBehaviour.gameObject.GetHashCode();
+            Debug.Log("in doorscript => " + keyID);
+            StartCoroutine(CheckForKeyMakeDoorGreen());
+        }
     }
 
-    private IEnumerator OpenDoor()
+    public IEnumerator OpenDoor()
     {
+        if (doorType == DoorType.Key || doorType == DoorType.Both)
+        {
+            if (Inventory.instance.HasKey(keyID, out int keyInvIdx))
+            {
+                if (isCloseAfterDelay || doorType == DoorType.Both)
+                {
+                    //dont remove key but keep it for later use
+                }
+                else
+                {
+                    //key removed
+                    Inventory.instance.RemoveKey(keyInvIdx);
+                }
+
+                spriteRend.color = Color.white;
+                Debug.Log("Opening Door");
+            }
+            else
+            {
+                yield break;
+            }
+        }
+
+        interactableCollider2D.enabled = false;
         float t = 0;
         float yCurr = doorTransform.position.y;
         float yEnd = yCurr + yUpDist;
@@ -53,16 +81,28 @@ public class InteractableDoorBehaviour : InteractableObject
         }
         doorTransform.position = new Vector3(doorTransform.position.x, yEnd);
 
+        isOpen = true;
+
         if (isCloseAfterDelay)
         {
-            StartCoroutine(CloseDoor());
+            StartCoroutine(CloseDoor(true));
         }
+
+        if (doorType == DoorType.Lever || doorType == DoorType.Both)
+        {
+            interactableCollider2D.enabled = true;
+        }
+
 
     }
 
-    private IEnumerator CloseDoor()
+    public IEnumerator CloseDoor(bool isDelay)
     {
-        yield return new WaitForSeconds(closeDelay);
+        interactableCollider2D.enabled = false;
+        if (isDelay)
+        {
+            yield return new WaitForSeconds(closeDelay);
+        }
 
         float t = 0;
         float yCurr = doorTransform.position.y;
@@ -74,7 +114,9 @@ public class InteractableDoorBehaviour : InteractableObject
             yield return new WaitForEndOfFrame();
         }
         doorTransform.position = new Vector3(doorTransform.position.x, yEnd);
-        doorCollider2D.enabled = true;
+        interactableCollider2D.enabled = true;
+        
+        isOpen = false;
 
     }
 

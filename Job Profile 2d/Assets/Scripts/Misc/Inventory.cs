@@ -8,7 +8,7 @@ public class Inventory : MonoBehaviour
         instance = this;
     }
 
-    private Item[] items;
+    [SerializeField] private Item[] items;
     private int currItemCount = 0;
 
     private void Start()

@@ -1,4 +1,7 @@
-﻿public class Item
+﻿using System;
+
+[Serializable]
+public class Item
 {
     public int id = -1;
 
