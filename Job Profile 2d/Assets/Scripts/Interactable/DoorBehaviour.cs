@@ -9,21 +9,26 @@ public class DoorBehaviour : InteractableObject
     private int keyID;
     public SpriteRenderer spriteRend;
     public float yUpDist = 3;
-    private float yCurr;
     public float doorOpenSmooth = 1f;
-    public Collider2D collider2D;
+    public Collider2D doorCollider2D;
+    public bool isCloseAfterDelay = false;
+    public float closeDelay = 2f;
+    public bool isUp = true;
 
     public override void OnInteract()
     {
-        if (Inventory.instance.HasKey(keyID, out int keyInvIdx))
+        if (isPlayerInRange && Inventory.instance.HasKey(keyID, out int keyInvIdx))
         {
-            //key removed
-            Inventory.instance.RemoveKey(keyInvIdx);
+            if (!isCloseAfterDelay)
+            {
+                //key removed
+                Inventory.instance.RemoveKey(keyInvIdx);
+            }
 
             spriteRend.color = Color.white;
             StartCoroutine(OpenDoor());
             Debug.Log("Opening Door");
-            collider2D.enabled = false;
+            doorCollider2D.enabled = false;
         }
     }
 
@@ -37,7 +42,7 @@ public class DoorBehaviour : InteractableObject
     private IEnumerator OpenDoor()
     {
         float t = 0;
-        yCurr = transform.position.y;
+        float yCurr = transform.position.y;
         float yEnd = yCurr + yUpDist;
         while (t < 1)
         {
@@ -46,6 +51,30 @@ public class DoorBehaviour : InteractableObject
             yield return new WaitForEndOfFrame();
         }
         transform.position = new Vector3(transform.position.x, yEnd);
+
+        if (isCloseAfterDelay)
+        {
+            StartCoroutine(CloseDoor());
+        }
+
+    }
+
+    private IEnumerator CloseDoor()
+    {
+        yield return new WaitForSeconds(closeDelay);
+
+        float t = 0;
+        float yCurr = transform.position.y;
+        float yEnd = yCurr - yUpDist;
+        while (t < 1)
+        {
+            transform.position = new Vector3(transform.position.x, Mathf.Lerp(yCurr, yEnd, t));
+            t += Time.deltaTime * doorOpenSmooth;
+            yield return new WaitForEndOfFrame();
+        }
+        transform.position = new Vector3(transform.position.x, yEnd);
+        doorCollider2D.enabled = true;
+
     }
 
     private IEnumerator CheckForKeyMakeDoorGreen()
