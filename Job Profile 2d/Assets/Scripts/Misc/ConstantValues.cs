@@ -11,5 +11,6 @@ public class ConstantValues : MonoBehaviour
     }
 
     public readonly string TAG_PLAYER = "Player";
+    public readonly string TAG_PLAYER_DETECT = "PlayerDetect";
 
 }

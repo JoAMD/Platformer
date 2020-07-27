@@ -42,7 +42,7 @@ public class ElevatorBehaviour : InteractableObject
     /// Decides direction according to isGoingUp
     /// Disables trigger collider so that player can'i interact when elevator is moving
     /// </summary>
-    private void MoveElevator()
+    public void MoveElevator()
     {
         triggerInteractableCollider.enabled = false; //Disable trigger collider
         if (currentFloor == floors.Count - 1)
